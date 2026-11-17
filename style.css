@@ -17,6 +17,21 @@ css
     align-items: start;
 }
 
+/* Tablet */
+@media (max-width: 1250px) {
+    .karten-grid {
+        grid-template-columns: repeat(2, 375px);
+    }
+}
+
+/* Smartphone */
+@media (max-width: 800px) {
+    .karten-grid {
+        grid-template-columns: 375px;
+        justify-content: center;
+    }
+}
+
 .card {
     background: #333;
     color: white;
