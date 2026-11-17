@@ -3,9 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Webseite</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Meine Set</title>
 </head>
 <body>
-    <h1>Hello Magic!</h1>
+    <h1>Kartenübersicht</h1>
+    <button id="loadButton">Datei laden</button>
+    <input
+        type="file"
+        id="setFile"
+        hidden
+    >
+
+    <div class="search-container">
+        <input
+            type="text"
+            id="cardSearch"
+            placeholder="Karten suchen..."
+        >
+    </div>
+
+    <div class="scroll-container">
+        <div class="karten-grid" id="kartenGrid">
+        </div>
+    </div>
+
+    <script>
+
+        const loadButton = document.getElementById("loadButton");
+        const setFile = document.getElementById("setFile");
+
+        const searchInput = document.getElementById("cardSearch");
+
+        searchInput.addEventListener("input", function() {
+
+            const searchValue = this.value.toLowerCase();
+
+            const cards = document.querySelectorAll(".card");
+
+            cards.forEach(card => {
+
+                const cardName = card.querySelector(".cardName")
+                    .textContent.toLowerCase();
+
+                card.style.display = cardName.includes(searchValue)
+                    ? "flex"
+                    : "none";
+
+            });
+
+        });
+
+        loadButton.addEventListener("click", () => {
+            setFile.click();
+        });
+
+        setFile.addEventListener("change", async (event) => {
+
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+            var fileNameSplit = file.name.split(".");
+            
+            var fileType = fileNameSplit[fileNameSplit.length - 1]
+
+            switch (fileType) {
+                case "txt":
+                    await loadCardsFromCSV(file);
+                    break;
+                case "csv":
+                    await loadCardsFromCSV(file);
+                    break;
+            
+                default:
+                    break;
+            }
+
+
+            //await loadCardsFromCSV(file);
+
+            // Ermöglicht erneutes Laden derselben Datei
+            event.target.value = "";
+
+        });
+
+        // Grid befüllen
+        const kartenGrid = document.getElementById("kartenGrid");
+        
+        async function loadCardsFromCSV(file) {
+
+            try {
+
+                // Datei einlesen
+                const text = await file.text();
+
+                // Zeilen aufteilen
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+
+                if (lines.length < 2) {
+                    throw new Error("Die Datei enthält keine Kartendaten!");
+                }
+
+                // Kopfzeile auslesen
+                const headers = lines[0].split("\t").map(header => header.trim());
+
+                const grid = document.getElementById("kartenGrid");
+                grid.innerHTML = "";
+
+                // Kartendaten auslesen
+                for (let i = 1; i < lines.length; i++) {
+
+                    const values = lines[i].split("\t");
+
+                    // Objekt aus Header und Werten erzeugen
+                    const data = {};
+
+                    headers.forEach((header, index) => {
+                        data[header] = values[index]?.trim() || "";
+                    });
+                    if(!data["Type"].includes("Token")){
+                        grid.appendChild(createCardFromCSV(data));
+                    }
+                    
+                }
+
+                console.log("Karten erfolgreich geladen!");
+
+            } catch (error) {
+
+                console.error("Fehler beim Laden:", error);
+                alert(error.message);
+
+            }
+        }
+
+        function createCardFromCSV(cardData) {
+
+            // Hauptcontainer
+            const card = document.createElement("div");
+            card.className = "card";
+            card.style.backgroundColor = getCardColor(cardData["Mana Cost"] || "");
+
+            // Card Head
+            const cardHead = document.createElement("div");
+            cardHead.className = "cardHead";
+
+            const cardName = document.createElement("div");
+            cardName.className = "cardName";
+            cardName.textContent = cardData["Name"];
+
+            const cardCost = document.createElement("div");
+            cardCost.className = "cardCost";
+            cardCost.textContent = cardData["Mana Cost"]
+
+            cardHead.append(
+                cardName, 
+                cardCost
+            );
+
+            // Card Mid
+            const cardMid = document.createElement("div");
+            cardMid.className = "cardMid";
+
+            //const cardSuperType = document.createElement("div");
+            //cardSuperType.className = "cardSuperType";
+            //cardSuperType.textContent = getValue(cardData, "type > supertype");
+
+            const cardType = document.createElement("div");
+            cardType.className = "cardType";
+            cardType.textContent = cardData["Type"];
+
+            const cardRarity = document.createElement("div");
+            cardRarity.className = "cardRarity";
+            cardRarity.textContent = cardData["Rarity"];
+
+            cardMid.append(
+                //cardSuperType,
+                cardType,
+                cardRarity
+            );
+            
+            // Card Main
+            const cardMain = document.createElement("div");
+            cardMain.className = "cardMain";
+
+            const cardText = document.createElement("div");
+            cardText.className = "cardText";
+            cardText.textContent = (cardData["Rules Text"] || "").replace(/\\n /g, "\n");;
+
+            const cardFlavorText = document.createElement("div");
+            cardFlavorText.className = "cardFlavorText";
+            cardFlavorText.textContent = cardData["Flavor Text"];
+
+            cardMain.append(
+                cardText,
+                cardFlavorText,
+            );
+
+
+            // Bottom
+            const cardBottom = document.createElement("div");
+            cardBottom.className = "cardBottom";
+
+            const cardPNT = document.createElement("div");
+            if (typeof cardData["Power"] === "string" && cardData["Power"].trim() !== "") {
+                var PNT = cardData["Power"].concat("/").concat(cardData["Toughness"]);
+                cardPNT.className = "cardPNT";
+                cardPNT.textContent = PNT;
+                var PNT = null;
+            }
+
+            //const cardPower = document.createElement("div");
+            //cardPower.className = "cardPower";
+            //cardPower.textContent = cardData["Power"];
+
+            //const cardToughness = document.createElement("div");
+            //cardToughness.className = "cardToughness";
+            //cardToughness.textContent = getValue(cardData, "stats > toughness");
+
+            cardBottom.append(
+                cardPNT,
+                //cardPower,
+                //cardToughness,
+            );
+ 
+            // Karte zusammensetzen
+            card.append(
+                cardHead,
+                cardMid,
+                cardMain,
+                cardBottom
+            );
+
+            return card;
+        }
+
+
+        async function loadCards(file) {
+            try {
+
+                // Datei als Text lesen
+                const xmlText = await file.text();
+                console.log(xmlText);
+
+                // XML parsen
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(
+                    xmlText,
+                    "application/xml"
+                );
+
+                // XML-Fehler prüfen
+                if (xml.querySelector("parsererror")) {
+                    throw new Error("Ungültige XML-Datei!");
+                }
+
+                const cards = xml.querySelectorAll("spoiler > card");
+
+                const grid = document.getElementById("kartenGrid");
+                grid.innerHTML = "";
+
+                cards.forEach(cardData => {
+                    grid.appendChild(createCard(cardData));
+                });
+            }
+            catch (error) {
+                console.error("Fehler beim Laden:", error);
+                alert(error.message);
+            }
+        }
+
+        function createCard(cardData) {
+
+            // Hilfsfunktion zum Auslesen
+            function getValue(parent, selector) {
+                return parent.querySelector(selector)?.textContent.trim() || "";
+            }
+
+            // Hauptcontainer
+            const card = document.createElement("div");
+            card.className = "card";
+
+            // Card Head
+            const cardHead = document.createElement("div");
+            cardHead.className = "cardHead";
+
+            const cardName = document.createElement("div");
+            cardName.className = "cardName";
+            cardName.textContent = getValue(cardData, "name");
+
+            const cardCost = document.createElement("div");
+            cardCost.className = "cardCost";
+            cardCost.textContent = getValue(cardData, "cost");
+
+            cardHead.append(cardName, cardCost);
+
+
+            // Card Mid
+            const cardMid = document.createElement("div");
+            cardMid.className = "cardMid";
+
+            const cardSuperType = document.createElement("div");
+            cardSuperType.className = "cardSuperType";
+            cardSuperType.textContent = getValue(cardData, "type > supertype");
+
+            const cardType = document.createElement("div");
+            cardType.className = "cardType";
+            cardType.textContent = getValue(cardData, "type > subtype");
+
+            const cardRarity = document.createElement("div");
+            cardRarity.className = "cardRarity";
+            cardRarity.textContent = getValue(cardData, "rarity");
+
+            cardMid.append(
+                cardSuperType,
+                cardType,
+                cardRarity
+            );
+            
+            // Card Main
+            const cardMain = document.createElement("div");
+            cardMain.className = "cardMain";
+
+            const cardText = document.createElement("div");
+            cardText.className = "cardText";
+            cardText.textContent = getValue(cardData, "rules");
+
+            const cardFlavorText = document.createElement("div");
+            cardFlavorText.className = "cardFlavorText";
+            cardFlavorText.textContent = getValue(cardData, "flavor");
+
+            cardMain.append(
+                cardText,
+                cardFlavorText,
+            );
+
+
+            // Bottom
+            const cardBottom = document.createElement("div");
+            cardBottom.className = "cardBottom";
+
+            const cardPNT = document.createElement("div");
+            if (typeof getValue(cardData, "stats > power") === "string" && getValue(cardData, "stats > power").trim() !== "") {
+                var PNT = getValue(cardData, "stats > power").concat("/").concat(getValue(cardData, "stats > toughness"));
+                cardPNT.className = "cardPNT";
+                cardPNT.textContent = PNT;
+                var PNT = null;
+            }
+
+            const cardPower = document.createElement("div");
+            cardPower.className = "cardPower";
+            cardPower.textContent = getValue(cardData, "stats > power");
+
+            const cardToughness = document.createElement("div");
+            cardToughness.className = "cardToughness";
+            cardToughness.textContent = getValue(cardData, "stats > toughness");
+
+            cardBottom.append(
+                cardPNT,
+                //cardPower,
+                //cardToughness,
+            );
+ 
+            // Karte zusammensetzen
+            card.append(
+                cardHead,
+                cardMid,
+                cardMain,
+                cardBottom
+            );
+
+            return card;
+        }
+
+        function getCardColor(cost) {
+
+            var colors = [];
+
+            if (cost.includes("W")) colors.push("W"); // Weiß
+            if (cost.includes("U")) colors.push("U"); // Blau
+            if (cost.includes("B")) colors.push("B"); // Schwarz
+            if (cost.includes("R")) colors.push("R"); // Rot
+            if (cost.includes("G")) colors.push("G"); // Grün
+
+            if (colors.length > 1) {
+                return "#e1b002";
+            }
+
+            if (cost.includes("W")) return "#e8dfc5"; // Weiß
+            if (cost.includes("U")) return "#3979b9"; // Blau
+            if (cost.includes("B")) return "#494049"; // Schwarz
+            if (cost.includes("R")) return "#bd4949"; // Rot
+            if (cost.includes("G")) return "#39804d"; // Grün
+
+            return "#333333"; // Farblos
+        }
+
+    </script>
+
+
 </body>
 </html>
