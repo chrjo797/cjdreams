@@ -159,6 +159,22 @@ css
     color: black;
 }
 
+.secondCardText {
+    white-space: pre-wrap;
+    margin-bottom: 15px;
+}
+
+.secondCardFlavorText {
+    font-style: italic;
+    color: #272727;
+}
+
+.secondCardPNT {
+    margin-left: auto;
+    text-align: right;
+}
+
+
 
 
 .search-container {

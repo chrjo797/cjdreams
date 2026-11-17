@@ -273,7 +273,7 @@
 
             const cardText = document.createElement("div");
             cardText.className = "cardText";
-            cardText.textContent = (cardData["Rules Text"] || "").replace(/\\n /g, "\n");;
+            cardText.innerHTML = (cardData["Rules Text"] || "").replace(/\\n /g, "\n").replace(/\((.*?)\)/g, "<i>($1)</i>");
 
             const cardFlavorText = document.createElement("div");
             cardFlavorText.className = "cardFlavorText";
@@ -358,7 +358,7 @@
 
                 const secondCardText = document.createElement("div");
                 secondCardText.className = "secondCardText";
-                secondCardText.textContent = (cardData["Rules Text 2"] || "").replace(/\\n /g, "\n");;
+                secondCardText.innerHTML = (cardData["Rules Text 2"] || "").replace(/\\n /g, "\n").replace(/\((.*?)\)/g, "<i>($1)</i>");
 
                 const secondCardFlavorText = document.createElement("div");
                 secondCardFlavorText.className = "secondCardFlavorText";
