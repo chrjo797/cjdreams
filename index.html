@@ -35,10 +35,55 @@
 
         const searchInput = document.getElementById("cardSearch");
 
-        searchInput.addEventListener("input", function() {
+        searchInput.addEventListener("keypress", function(e) {
+          if (e.key === 'Enter') {
 
-            const searchValue = this.value.toLowerCase();
+            var searchValue = this.value.toLowerCase();
+            const oracleRegex = /o:\s*(?:\{([^}]*)\}|(\w+))/g;
+            const typeRegex = /t:\s*(?:\{([^}]*)\}|(\w+))/g;
 
+            var matches
+
+            var oracle;
+            var oracles = [];
+
+            var type;
+            var types = [];
+
+            matches = searchValue.match(oracleRegex);
+
+            if(matches != null){
+                matches.forEach(element => {
+                    if(element != null){
+                        searchValue = searchValue.replace(element, "");
+                        oracle = element;
+                        oracle = oracle.replace("o:", "");
+                        oracle = oracle.replace("{", "");
+                        oracle = oracle.replace("}", "");
+                        oracles.push(oracle);
+                    }
+                });
+            }
+
+            matches = searchValue.match(typeRegex);
+
+            if(matches != null){
+                matches.forEach(element => {
+                    searchValue = searchValue.replace(element, "");
+                    if(element != null){
+                        type = element;
+                        type = type.replace("t:", "");
+                        type = type.replace("{", "");
+                        type = type.replace("}", "");
+                        types.push(type);
+                    }
+                });
+            }
+
+            console.log(searchValue);
+
+            const names = searchValue.split(" ");
+            
             const cards = document.querySelectorAll(".card");
 
             cards.forEach(card => {
@@ -46,13 +91,56 @@
                 const cardName = card.querySelector(".cardName")
                     .textContent.toLowerCase();
 
-                card.style.display = cardName.includes(searchValue)
+                names.forEach(searchValue => {
+                    card.style.display = cardName.includes(searchValue)
                     ? "flex"
                     : "none";
+                });
+
+                const cardText = card.querySelector(".cardText")
+                    .textContent.toLowerCase();
+
+                oracles.forEach(searchValue => {
+                    card.style.display = cardText.includes(searchValue)
+                    ? "flex"
+                    : "none";
+                });
+
+                if (card.querySelectorAll(".secondCardText").length > 0){
+                    const secondCardText = card.querySelector(".secondCardText")
+                        .textContent.toLowerCase();
+
+                    oracles.forEach(searchValue => {
+                        card.style.display = secondCardText.includes(searchValue)
+                        ? "flex"
+                        : "none";
+                    });
+                }
+
+                const cardType = card.querySelector(".cardType")
+                    .textContent.toLowerCase();
+
+                types.forEach(searchValue => {
+                    card.style.display = cardType.includes(searchValue)
+                    ? "flex"
+                    : "none";
+                });
+
+                if (card.querySelectorAll(".secondCardType").length > 0){
+                    const secondCardType = card.querySelector(".secondCardType")
+                        .textContent.toLowerCase();
+
+                    types.forEach(searchValue => {
+                        card.style.display = secondCardType.includes(searchValue)
+                        ? "flex"
+                        : "none";
+                    });
+                }
+
 
             });
 
-        });
+        }});
 
         loadButton.addEventListener("click", () => {
             setFile.click();
@@ -166,10 +254,6 @@
             const cardMid = document.createElement("div");
             cardMid.className = "cardMid";
 
-            //const cardSuperType = document.createElement("div");
-            //cardSuperType.className = "cardSuperType";
-            //cardSuperType.textContent = getValue(cardData, "type > supertype");
-
             const cardType = document.createElement("div");
             cardType.className = "cardType";
             cardType.textContent = cardData["Type"];
@@ -179,7 +263,6 @@
             cardRarity.textContent = cardData["Rarity"];
 
             cardMid.append(
-                //cardSuperType,
                 cardType,
                 cardRarity
             );
@@ -202,7 +285,7 @@
             );
 
 
-            // Bottom
+            // Card Bottom
             const cardBottom = document.createElement("div");
             cardBottom.className = "cardBottom";
 
@@ -214,27 +297,112 @@
                 var PNT = null;
             }
 
-            //const cardPower = document.createElement("div");
-            //cardPower.className = "cardPower";
-            //cardPower.textContent = cardData["Power"];
-
-            //const cardToughness = document.createElement("div");
-            //cardToughness.className = "cardToughness";
-            //cardToughness.textContent = getValue(cardData, "stats > toughness");
 
             cardBottom.append(
                 cardPNT,
-                //cardPower,
-                //cardToughness,
             );
- 
-            // Karte zusammensetzen
-            card.append(
-                cardHead,
-                cardMid,
-                cardMain,
-                cardBottom
-            );
+            
+            if (typeof cardData["Rules Text 2"] === "string" && cardData["Rules Text 2"].trim() === "") {
+                // Karte zusammensetzen
+                card.append(
+                    cardHead,
+                    cardMid,
+                    cardMain,
+                    cardBottom
+                );
+            }
+            else{
+                
+                // Hauptcontainer
+                const secondCard = document.createElement("div");
+                secondCard.className = "secondCard";
+                secondCard.style.backgroundColor = getCardColor(cardData["Mana Cost 2"] || "");
+
+                // Card Head
+                const secondCardHead = document.createElement("div");
+                secondCardHead.className = "secondCardHead";
+
+                const secondCardName = document.createElement("div");
+                secondCardName.className = "secondCardName";
+                secondCardName.textContent = cardData["Name 2"];
+
+                const secondCardCost = document.createElement("div");
+                secondCardCost.className = "secondCardCost";
+                secondCardCost.textContent = cardData["Mana Cost 2"]
+
+                secondCardHead.append(
+                    secondCardName, 
+                    secondCardCost
+                );
+
+                // Card Mid
+                const secondCardMid = document.createElement("div");
+                secondCardMid.className = "secondCardMid";
+
+                const secondCardType = document.createElement("div");
+                secondCardType.className = "secondCardType";
+                secondCardType.textContent = cardData["Type 2"];
+
+                const secondCardRarity = document.createElement("div");
+                secondCardRarity.className = "secondCardRarity";
+                secondCardRarity.textContent = cardData["Rarity 2"];
+
+                secondCardMid.append(
+                    secondCardType,
+                    secondCardRarity
+                );
+                
+                // Card Main
+                const secondCardMain = document.createElement("div");
+                secondCardMain.className = "secondCardMain";
+
+                const secondCardText = document.createElement("div");
+                secondCardText.className = "secondCardText";
+                secondCardText.textContent = (cardData["Rules Text 2"] || "").replace(/\\n /g, "\n");;
+
+                const secondCardFlavorText = document.createElement("div");
+                secondCardFlavorText.className = "secondCardFlavorText";
+                secondCardFlavorText.textContent = cardData["Flavor Text 2"];
+
+                secondCardMain.append(
+                    secondCardText,
+                    secondCardFlavorText,
+                );
+
+
+                // Card Bottom
+                const secondCardBottom = document.createElement("div");
+                secondCardBottom.className = "secondCardBottom";
+
+                const secondCardPNT = document.createElement("div");
+                if (typeof cardData["Power 2"] === "string" && cardData["Power 2"].trim() !== "") {
+                    var PNT = cardData["Power 2"].concat("/").concat(cardData["Toughness 2"]);
+                    secondCardPNT.className = "secondCardPNT";
+                    secondCardPNT.textContent = PNT;
+                    var PNT = null;
+                }
+
+
+                secondCardBottom.append(
+                    secondCardPNT,
+                );
+
+                secondCard.append(
+                    secondCardHead,
+                    secondCardMid,
+                    secondCardMain,
+                    secondCardBottom
+                );
+
+                card.append(
+                    cardHead,
+                    cardMid,
+                    cardMain,
+                    cardBottom,
+                    secondCard
+                );
+
+            }
 
             return card;
         }

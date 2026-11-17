@@ -55,26 +55,11 @@ css
     color: black;
 }
 
-.cardRarity{
-    margin-left: auto; 
-    margin-right: 0;
-}
-
 .cardMain {
     padding-top: 10px;
     flex-grow: 1;
     background: #fafafaa9;
     color: black;
-}
-
-.cardText {
-    white-space: pre-wrap;
-    margin-bottom: 15px;
-}
-
-.cardFlavorText {
-    font-style: italic;
-    color: #272727;
 }
 
 .cardBottom {
@@ -87,9 +72,76 @@ css
     color: black;
 }
 
+.cardRarity{
+    margin-left: auto; 
+    margin-right: 0;
+}
+
+.cardText {
+    white-space: pre-wrap;
+    margin-bottom: 15px;
+}
+
+.cardFlavorText {
+    font-style: italic;
+    color: #272727;
+}
+
 .cardPNT {
     margin-left: auto;
     text-align: right;
+}
+
+
+
+.secondCard {
+    background: #333;
+    color: white;
+    border: 1px solid #666;
+    border-radius: 8px;
+    padding: 12px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.secondCardHead {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    padding-bottom: 10px;
+    background: #fafafaa9;
+    color: black;
+}
+
+.secondCardMid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #fafafaa9;
+    color: black;
+}
+
+.secondCardMain {
+    padding-top: 10px;
+    flex-grow: 1;
+    background: #fafafaa9;
+    color: black;
+}
+
+.secondCardBottom {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    width: 100%;
+    background: #fafafaa9;
+    color: black;
 }
 
 
